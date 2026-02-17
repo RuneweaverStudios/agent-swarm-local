@@ -1,0 +1,38 @@
+{
+  "name": "agent-swarm-local",
+  "displayName": "Agent Swarm (Local + OpenRouter) | OpenClaw Skill",
+  "version": "1.0.0",
+  "description": "Hybrid LLM routing: local Ollama models via WebLLM/WebGPU (persistent, zero-cost) for orchestrator and simple tasks, OpenRouter for complex tasks. Best of both worlds: zero-cost local processing + cloud power when needed.",
+  "author": "Austin",
+  "requires": {
+    "env": [
+      "OPENCLAW_HOME",
+      "WEBGPU_DAEMON_PORT"
+    ],
+    "platform": {
+      "openclaw": {
+        "config": {
+          "openrouter_api_key": "Required: OpenRouter API key must be configured in OpenClaw platform settings for complex tasks",
+          "webgpu_daemon": "Required: WebGPU daemon must be running with persistent models (Llama 3.2, Mistral, CodeLlama)",
+          "openclaw_json": "Reads tools.exec.host and tools.exec.node from openclaw.json (located via OPENCLAW_HOME or ~/.openclaw/openclaw.json)"
+        }
+      }
+    }
+  },
+  "fileAccess": {
+    "read": [
+      "openclaw.json (tools.exec.host and tools.exec.node only)"
+    ],
+    "write": []
+  },
+  "localDaemon": {
+    "type": "webgpu",
+    "persistent": true,
+    "models": [
+      "ollama/llama3.2",
+      "ollama/mistral",
+      "ollama/codellama"
+    ],
+    "port": 8080
+  }
+}

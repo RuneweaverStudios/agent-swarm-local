@@ -1,0 +1,224 @@
+{
+  "name": "Agent Swarm (Local + OpenRouter) | OpenClaw Skill",
+  "description": "Hybrid LLM routing: local Ollama models via WebLLM/WebGPU for orchestrator and simple tasks (persistent, no initialization overhead), OpenRouter for complex tasks. Best of both worlds: zero-cost local processing + cloud power when needed.",
+  "version": "1.0.0",
+  "author": "Austin",
+  "default_model": "ollama/llama3.2",
+  "local_models": {
+    "persistent": true,
+    "daemon": "webgpu",
+    "initialization": "on_demand",
+    "models": [
+      "ollama/llama3.2",
+      "ollama/llama3.1",
+      "ollama/mistral",
+      "ollama/codellama"
+    ]
+  },
+  "models": [
+    {
+      "id": "ollama/llama3.2",
+      "alias": "Llama-3.2-Local",
+      "tier": "FAST",
+      "provider": "ollama",
+      "local": true,
+      "persistent": true,
+      "daemon": "webgpu",
+      "input_cost_per_m": 0.0,
+      "output_cost_per_m": 0.0,
+      "context_window": 128000,
+      "capabilities": ["text", "code"],
+      "use_for": ["orchestrator", "fast responses", "simple tasks", "monitoring", "status checks", "summaries"],
+      "initialization_time": "persistent"
+    },
+    {
+      "id": "ollama/llama3.1",
+      "alias": "Llama-3.1-Local",
+      "tier": "FAST",
+      "provider": "ollama",
+      "local": true,
+      "persistent": true,
+      "daemon": "webgpu",
+      "input_cost_per_m": 0.0,
+      "output_cost_per_m": 0.0,
+      "context_window": 128000,
+      "capabilities": ["text", "code"],
+      "use_for": ["fast responses", "fallback"],
+      "initialization_time": "persistent"
+    },
+    {
+      "id": "ollama/mistral",
+      "alias": "Mistral-Local",
+      "tier": "CODE",
+      "provider": "ollama",
+      "local": true,
+      "persistent": true,
+      "daemon": "webgpu",
+      "input_cost_per_m": 0.0,
+      "output_cost_per_m": 0.0,
+      "context_window": 32000,
+      "capabilities": ["text", "code"],
+      "use_for": ["code generation", "debugging", "local code tasks"],
+      "initialization_time": "persistent"
+    },
+    {
+      "id": "ollama/codellama",
+      "alias": "CodeLlama-Local",
+      "tier": "CODE",
+      "provider": "ollama",
+      "local": true,
+      "persistent": true,
+      "daemon": "webgpu",
+      "input_cost_per_m": 0.0,
+      "output_cost_per_m": 0.0,
+      "context_window": 16000,
+      "capabilities": ["code"],
+      "use_for": ["code generation", "refactoring", "local code tasks"],
+      "initialization_time": "persistent"
+    },
+    {
+      "id": "openrouter/google/gemini-2.5-flash",
+      "alias": "Gemini-2.5-Flash",
+      "tier": "FAST",
+      "provider": "openrouter",
+      "local": false,
+      "input_cost_per_m": 0.30,
+      "output_cost_per_m": 2.50,
+      "context_window": 1048576,
+      "capabilities": ["text", "code", "vision"],
+      "use_for": ["fallback when local unavailable", "cloud fast tasks"]
+    },
+    {
+      "id": "openrouter/z-ai/glm-5",
+      "alias": "GLM-5",
+      "tier": "REASONING",
+      "provider": "openrouter",
+      "local": false,
+      "input_cost_per_m": 0.10,
+      "output_cost_per_m": 0.10,
+      "context_window": 128000,
+      "capabilities": ["text", "reasoning", "chain-of-thought"],
+      "use_for": ["reasoning", "math", "logic", "analysis"]
+    },
+    {
+      "id": "openrouter/moonshotai/kimi-k2.5",
+      "alias": "Kimi-k2.5",
+      "tier": "CREATIVE",
+      "provider": "openrouter",
+      "local": false,
+      "input_cost_per_m": 0.20,
+      "output_cost_per_m": 0.20,
+      "context_window": 128000,
+      "capabilities": ["text", "creative", "writing"],
+      "use_for": ["creative writing", "frontend design", "UI/UX", "stories"]
+    },
+    {
+      "id": "openrouter/z-ai/glm-4.7-flash",
+      "alias": "GLM-4.7-Flash",
+      "tier": "CODE",
+      "provider": "openrouter",
+      "local": false,
+      "input_cost_per_m": 0.06,
+      "output_cost_per_m": 0.40,
+      "context_window": 128000,
+      "capabilities": ["text", "code", "reasoning"],
+      "use_for": ["code generation", "debugging", "implementation", "complex code"]
+    },
+    {
+      "id": "openrouter/z-ai/glm-4.7",
+      "alias": "GLM-4.7",
+      "tier": "QUALITY",
+      "provider": "openrouter",
+      "local": false,
+      "input_cost_per_m": 0.40,
+      "output_cost_per_m": 1.50,
+      "context_window": 202752,
+      "capabilities": ["text", "code", "reasoning"],
+      "use_for": ["complex code", "architecture", "fallback"]
+    },
+    {
+      "id": "openrouter/anthropic/claude-sonnet-4",
+      "alias": "Claude-Sonnet-4",
+      "tier": "QUALITY",
+      "provider": "openrouter",
+      "local": false,
+      "input_cost_per_m": 3.00,
+      "output_cost_per_m": 15.00,
+      "context_window": 200000,
+      "capabilities": ["text", "code", "reasoning", "vision"],
+      "use_for": ["complex code", "architecture", "high-quality output"]
+    },
+    {
+      "id": "openrouter/openai/gpt-4o",
+      "alias": "GPT-4o",
+      "tier": "VISION",
+      "provider": "openrouter",
+      "local": false,
+      "input_cost_per_m": 2.50,
+      "output_cost_per_m": 10.00,
+      "context_window": 128000,
+      "capabilities": ["text", "code", "vision"],
+      "use_for": ["image analysis", "vision tasks"]
+    }
+  ],
+  "routing_rules": {
+    "FAST": {
+      "primary": "ollama/llama3.2",
+      "fallback": ["ollama/llama3.1", "openrouter/google/gemini-2.5-flash"],
+      "prefer_local": true,
+      "keywords": ["check", "get", "list", "show", "status", "monitor", "fetch", "simple", "quick"]
+    },
+    "REASONING": {
+      "primary": "openrouter/z-ai/glm-5",
+      "fallback": ["ollama/llama3.2"],
+      "prefer_local": false,
+      "keywords": ["reason", "prove", "logic", "analyze", "derive", "math", "think", "step by step"]
+    },
+    "CREATIVE": {
+      "primary": "openrouter/moonshotai/kimi-k2.5",
+      "fallback": ["ollama/llama3.2"],
+      "prefer_local": false,
+      "keywords": ["creative", "write", "story", "design", "UI", "UX", "frontend", "website", "style", "artistic"]
+    },
+    "RESEARCH": {
+      "primary": "ollama/llama3.2",
+      "fallback": ["ollama/llama3.1", "openrouter/google/gemini-2.5-flash"],
+      "prefer_local": true,
+      "keywords": ["research", "find", "search", "lookup", "web", "information", "fact", "review"]
+    },
+    "CODE": {
+      "primary": "ollama/mistral",
+      "fallback": ["ollama/codellama", "openrouter/z-ai/glm-4.7-flash"],
+      "prefer_local": true,
+      "keywords": ["code", "function", "class", "debug", "fix", "implement", "refactor", "lint", "test"]
+    },
+    "QUALITY": {
+      "primary": "openrouter/z-ai/glm-4.7",
+      "fallback": ["openrouter/anthropic/claude-sonnet-4", "ollama/mistral"],
+      "prefer_local": false,
+      "keywords": ["complex", "architecture", "design", "system", "comprehensive", "thorough"]
+    },
+    "COMPLEX": {
+      "primary": "openrouter/z-ai/glm-4.7",
+      "fallback": ["openrouter/anthropic/claude-sonnet-4"],
+      "prefer_local": false,
+      "keywords": ["complex", "architecture", "design", "system"]
+    },
+    "VISION": {
+      "primary": "openrouter/openai/gpt-4o",
+      "fallback": [],
+      "prefer_local": false,
+      "keywords": ["image", "picture", "photo", "screenshot", "visual", "analyze image"]
+    }
+  },
+  "local_daemon": {
+    "type": "webgpu",
+    "persistent": true,
+    "models_preload": ["ollama/llama3.2", "ollama/mistral"],
+    "webllm_config": {
+      "cache_dir": "~/.webllm_cache",
+      "model_lib_dir": "~/.webllm_model_lib",
+      "use_ndarray_cache": true
+    }
+  }
+}
