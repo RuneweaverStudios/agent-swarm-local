@@ -5,7 +5,14 @@
   "displayName": "Agent Swarm (Local + OpenRouter) | OpenClaw Skill",
   "description": "Hybrid LLM routing: local Ollama models via WebLLM/WebGPU (persistent, zero-cost) for orchestrator and simple tasks, OpenRouter for complex tasks. Best of both worlds: zero-cost local processing + cloud power when needed.",
   "author": "Austin",
-  "tags": [],
+  "tags": [
+    "routing",
+    "orchestration",
+    "subagents",
+    "local-models",
+    "openrouter",
+    "openclaw"
+  ],
   "platform": "openclaw",
   "requires": {
     "env": [
