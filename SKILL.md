@@ -25,6 +25,37 @@ It uses **local Ollama models via WebLLM/WebGPU** for the orchestrator and simpl
 - Cloud models use `openrouter/...` prefix
 - Local models are persistent (pre-loaded in WebGPU daemon, no initialization overhead)
 
+### WebGPU Daemon Setup
+
+The WebGPU daemon provides persistent local model inference. To set it up:
+
+1. **Install Ollama** (required for local models):
+   ```bash
+   curl -fsSL https://ollama.com/install.sh | sh
+   ```
+
+2. **Pull the required models**:
+   ```bash
+   ollama pull llama3.2
+   ollama pull mistral
+   ollama pull codellama
+   ```
+
+3. **Configure the WebGPU daemon** (optional environment variables):
+   - `WEBGPU_DAEMON_PORT` - Port for the daemon (default: `8080`)
+   - `WEBGPU_PERSISTENT` - Keep models loaded in memory (`true`/`false`, default: `true`)
+   - `WEBGPU_PRELOAD_MODELS` - Comma-separated list of models to preload on daemon start
+   - `WEBLLM_CACHE_DIR` - Directory for WebLLM model cache
+   - `WEBLLM_MODEL_LIB_DIR` - Directory for compiled model libraries
+
+4. **Verify the daemon is running**:
+   ```bash
+   python3 scripts/router.py health
+   ```
+   This checks both Ollama availability and the WebGPU daemon port (default 8080) with a 5-second timeout. If the daemon is unreachable, the router falls back to OpenRouter cloud models automatically.
+
+**GPU requirements**: WebGPU acceleration requires a GPU with Vulkan, Metal (macOS), or DirectX 12 support. On macOS, Metal is used automatically. On Linux, ensure Vulkan drivers are installed (`vulkaninfo` should succeed). Without GPU support, Ollama falls back to CPU inference which is significantly slower.
+
 ## Why this helps
 
 - **Zero cost** for simple tasks (local models via WebGPU)

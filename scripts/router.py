@@ -184,6 +184,21 @@ def check_local_model_available(model_id):
         return False
 
 
+def check_webgpu_daemon_available(port=None, timeout=5):
+    """
+    Check if the WebGPU daemon is reachable on the configured port.
+    Returns True if daemon responds within the timeout, False otherwise.
+    """
+    import socket
+    daemon_port = port or int(os.environ.get("WEBGPU_DAEMON_PORT", 8080))
+    try:
+        sock = socket.create_connection(("127.0.0.1", daemon_port), timeout=timeout)
+        sock.close()
+        return True
+    except (ConnectionRefusedError, socket.timeout, OSError):
+        return False
+
+
 class HybridRouter:
     """Hybrid local + OpenRouter intelligent model router."""
     
