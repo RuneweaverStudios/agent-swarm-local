@@ -1,7 +1,7 @@
 {
   "name": "Agent Swarm (Local + OpenRouter) | OpenClaw Skill",
   "description": "Hybrid LLM routing: local Ollama models via WebLLM/WebGPU for orchestrator and simple tasks (persistent, no initialization overhead), OpenRouter for complex tasks. Best of both worlds: zero-cost local processing + cloud power when needed.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Austin",
   "default_model": "ollama/llama3.2",
   "local_models": {
@@ -197,12 +197,6 @@
       "fallback": ["openrouter/anthropic/claude-sonnet-4", "ollama/mistral"],
       "prefer_local": false,
       "keywords": ["complex", "architecture", "design", "system", "comprehensive", "thorough"]
-    },
-    "COMPLEX": {
-      "primary": "openrouter/z-ai/glm-4.7",
-      "fallback": ["openrouter/anthropic/claude-sonnet-4"],
-      "prefer_local": false,
-      "keywords": ["complex", "architecture", "design", "system"]
     },
     "VISION": {
       "primary": "openrouter/openai/gpt-4o",

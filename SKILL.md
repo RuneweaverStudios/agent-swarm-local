@@ -2,7 +2,7 @@
 name: agent-swarm-local
 displayName: Agent Swarm (Local + OpenRouter) | OpenClaw Skill
 description: "Hybrid routing: local Ollama models via WebLLM/WebGPU (persistent, zero-cost) for orchestrator and simple tasks, OpenRouter for complex tasks."
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Agent Swarm (Local + OpenRouter) | OpenClaw Skill

@@ -1,29 +1,40 @@
 {
   "schema": "openclaw.skill.v1",
   "name": "agent-swarm-local",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "displayName": "Agent Swarm (Local + OpenRouter) | OpenClaw Skill",
-  "description": "Hybrid LLM routing: local Ollama models via WebLLM/WebGPU (persistent, zero-cost) for orchestrator and simple tasks, OpenRouter for complex tasks. Best of both worlds: zero-cost local processing + cloud power when needed.",
+  "description": "Hybrid LLM routing: local Ollama models via WebLLM/WebGPU (persistent, zero-cost) for orchestrator and simple tasks, OpenRouter cloud models for complex tasks. Includes local model health checking and quality verification. Supports parallel multi-task splitting. Up to 82% cost savings by routing FAST, RESEARCH, and CODE tasks locally.",
   "author": "Austin",
+  "license": "MIT",
+  "homepage": "https://github.com/RuneweaverStudios/agent-swarm-local",
   "tags": [
     "routing",
     "orchestration",
     "subagents",
     "local-models",
     "openrouter",
-    "openclaw"
+    "openclaw",
+    "ollama",
+    "webgpu",
+    "hybrid-routing",
+    "cost-optimization"
   ],
   "platform": "openclaw",
   "requires": {
-    "env": [
+    "python": ">=3.8",
+    "optionalEnv": [
       "OPENCLAW_HOME",
-      "WEBGPU_DAEMON_PORT"
+      "WEBGPU_DAEMON_PORT",
+      "WEBGPU_PERSISTENT",
+      "WEBGPU_PRELOAD_MODELS",
+      "WEBLLM_CACHE_DIR",
+      "WEBLLM_MODEL_LIB_DIR"
     ],
     "platform": {
       "openclaw": {
         "config": {
-          "openrouter_api_key": "Required: OpenRouter API key must be configured in OpenClaw platform settings for complex tasks",
-          "webgpu_daemon": "Required: WebGPU daemon must be running with persistent models (Llama 3.2, Mistral, CodeLlama)",
+          "openrouter_api_key": "Required for complex tasks: OpenRouter API key in OpenClaw platform settings",
+          "webgpu_daemon": "Recommended: WebGPU daemon running with persistent models (Llama 3.2, Mistral, CodeLlama)",
           "openclaw_json": "Reads tools.exec.host and tools.exec.node from openclaw.json (located via OPENCLAW_HOME or ~/.openclaw/openclaw.json)"
         }
       }
@@ -35,14 +46,25 @@
     ],
     "write": []
   },
+  "commands": {
+    "default": "Show the default orchestrator model (local)",
+    "classify": "Classify a task into a routing tier (local or cloud)",
+    "spawn": "Generate sessions_spawn parameters for a task",
+    "models": "List all configured models (local + cloud)",
+    "health": "Check local model availability and quality",
+    "score": "Show detailed scoring breakdown",
+    "cost": "Estimate API cost (FREE if local)"
+  },
+  "tiers": ["FAST", "REASONING", "CREATIVE", "RESEARCH", "CODE", "QUALITY", "VISION"],
   "localDaemon": {
     "type": "webgpu",
     "persistent": true,
+    "defaultPort": 8080,
     "models": [
       "ollama/llama3.2",
       "ollama/mistral",
       "ollama/codellama"
-    ],
-    "port": 8080
-  }
+    ]
+  },
+  "basedOn": "agent-swarm (adapted for hybrid local/cloud routing)"
 }

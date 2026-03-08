@@ -7,7 +7,7 @@
 
 **Hybrid LLM routing and subagent delegation.** Routes simple tasks to local Ollama models (zero cost, persistent via WebGPU), complex tasks to OpenRouter cloud models. **Best of both worlds:** local efficiency + cloud power when needed. **Parallel tasks:** one message can spawn multiple subagents at once.
 
-**v1.0.0 — Hybrid local + cloud routing.** Persistent local models via WebGPU daemon (no initialization overhead), intelligent routing to OpenRouter for complex tasks. **Source:** Based on agent-swarm skill, optimized for hybrid local/cloud usage.
+**v1.1.0 — Hybrid local + cloud routing with health checking.** Persistent local models via WebGPU daemon (no initialization overhead), intelligent routing to OpenRouter for complex tasks. **Source:** Based on agent-swarm skill, optimized for hybrid local/cloud usage.
 
 Agent Swarm (Local + OpenRouter) routes your OpenClaw tasks intelligently: simple tasks run on local models (free, fast, persistent), complex tasks route to OpenRouter (powerful cloud models). You get zero-cost local processing for most tasks, with cloud power available when needed.
 
@@ -312,6 +312,108 @@ The router reads `openclaw.json` **only** to inspect `tools.exec.host` and `tool
 
 - **`config.json`** — Model list and `routing_rules` per tier; `default_model` (e.g. `ollama/llama3.2`) for session default and orchestrator; `local_daemon` config for WebGPU.
 - Router loads `config.json` from the parent of `scripts/` (skill root).
+
+---
+
+## Local Model Health Check
+
+The router can verify local model availability and response quality before routing tasks:
+
+```bash
+# Check all local models
+python scripts/router.py health
+
+# JSON output
+python scripts/router.py health --json
+```
+
+Health check output:
+```json
+{
+  "daemon_running": true,
+  "daemon_url": "http://localhost:8080",
+  "models": {
+    "ollama/llama3.2": {"available": true, "response_ms": 45, "quality": "ok"},
+    "ollama/mistral": {"available": true, "response_ms": 62, "quality": "ok"},
+    "ollama/codellama": {"available": false, "error": "model not loaded"}
+  },
+  "recommendation": "2/3 local models available. codellama tasks will fallback to OpenRouter."
+}
+```
+
+The router automatically falls back to OpenRouter if a local model is unavailable or returns low-quality responses.
+
+---
+
+## WebGPU Daemon Deep Dive
+
+### Architecture
+
+The WebGPU daemon acts as a persistent model server:
+
+```
+┌─────────────────────────────────────────────┐
+│  Agent Swarm Router                          │
+│  ├── classify_task() → tier                  │
+│  ├── check_local_model_available()           │
+│  │   └── GET http://localhost:8080/health     │
+│  └── spawn_agent() → {model, task, ...}      │
+└─────────┬───────────────────────┬────────────┘
+          │ local tasks           │ complex tasks
+          ▼                       ▼
+┌─────────────────┐    ┌──────────────────┐
+│  WebGPU Daemon   │    │  OpenRouter API   │
+│  port 8080       │    │  (cloud models)   │
+│  ├── llama3.2    │    │  ├── GLM 4.7      │
+│  ├── mistral     │    │  ├── Kimi k2.5    │
+│  └── codellama   │    │  ├── GPT-4o       │
+│  (persistent)    │    │  └── Claude S4    │
+└─────────────────┘    └──────────────────┘
+```
+
+### Daemon Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Daemon status and uptime |
+| `/models` | GET | List loaded models with status |
+| `/v1/chat/completions` | POST | OpenAI-compatible chat API |
+| `/v1/models` | GET | OpenAI-compatible model list |
+
+### Configuration File
+
+The daemon reads configuration from `config.json` under `local_daemon`:
+
+```json
+{
+  "local_daemon": {
+    "type": "webgpu",
+    "persistent": true,
+    "models_preload": ["ollama/llama3.2", "ollama/mistral", "ollama/codellama"],
+    "webllm_config": {
+      "cache_dir": "~/.webllm_cache",
+      "model_lib_dir": "~/.webllm_model_lib",
+      "use_ndarray_cache": true
+    }
+  }
+}
+```
+
+### Memory Management
+
+- Models are loaded once and stay in GPU memory
+- Typical memory usage: ~2-4 GB per model depending on size
+- Cache directory stores model weights for fast reload after daemon restart
+- Use `--preload` to specify which models to load at startup
+
+### Troubleshooting Daemon Issues
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| Daemon won't start | Port in use | Change `WEBGPU_DAEMON_PORT` or kill existing process |
+| Models load slowly | No cache | Run once with `--persistent` to cache; subsequent starts are fast |
+| Out of memory | Too many models | Reduce `--preload` list or use smaller model variants |
+| GPU not detected | Missing drivers | Install WebGPU-compatible GPU drivers |
 
 ---
 
