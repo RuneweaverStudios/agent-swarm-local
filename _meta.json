@@ -55,7 +55,15 @@
     "score": "Show detailed scoring breakdown",
     "cost": "Estimate API cost (FREE if local)"
   },
-  "tiers": ["FAST", "REASONING", "CREATIVE", "RESEARCH", "CODE", "QUALITY", "VISION"],
+  "tiers": [
+    "FAST",
+    "REASONING",
+    "CREATIVE",
+    "RESEARCH",
+    "CODE",
+    "QUALITY",
+    "VISION"
+  ],
   "localDaemon": {
     "type": "webgpu",
     "persistent": true,
@@ -66,5 +74,6 @@
       "ollama/codellama"
     ]
   },
-  "basedOn": "agent-swarm (adapted for hybrid local/cloud routing)"
+  "basedOn": "agent-swarm (adapted for hybrid local/cloud routing)",
+  "main": "scripts/router.py"
 }
