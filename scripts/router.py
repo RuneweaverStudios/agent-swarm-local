@@ -146,19 +146,40 @@ def check_local_model_available(model_id):
     """
     Check if a local model is available and persistent.
     Returns True if model is available, False otherwise.
+
+    Checks:
+    1. Whether ollama is running (via 'ollama list')
+    2. Whether the specific model is pulled/available locally
     """
     # Check if model ID is a local model
     if not model_id.startswith("ollama/"):
         return False
-    
-    # Check WebGPU daemon status (simplified check)
-    # In production, this would check the actual WebGPU/WebLLM daemon
+
+    model_name = model_id.replace("ollama/", "", 1)
+
+    # First check: is ollama running?
     try:
-        # Check if WebGPU daemon is running
-        # This is a placeholder - actual implementation would check daemon status
-        webgpu_port = os.environ.get("WEBGPU_DAEMON_PORT", "8080")
-        # Could check HTTP endpoint or process status
-        return True  # Assume available if daemon port is configured
+        result = subprocess.run(
+            ["ollama", "list"],
+            capture_output=True, text=True, timeout=5
+        )
+        if result.returncode != 0:
+            return False
+
+        # Parse ollama list output to check if the model is available
+        # Output format: NAME  ID  SIZE  MODIFIED
+        available_models = []
+        for line in result.stdout.strip().splitlines()[1:]:  # skip header
+            parts = line.split()
+            if parts:
+                available_models.append(parts[0].split(":")[0])  # strip :tag
+
+        return model_name in available_models or model_name.split(":")[0] in available_models
+    except FileNotFoundError:
+        # ollama not installed
+        return False
+    except subprocess.TimeoutExpired:
+        return False
     except Exception:
         return False
 
